@@ -8,7 +8,7 @@ require('dotenv').config();
 const PORT = process.env.PORT || 5000;
 const STRING = process.env.MONGODB_URI;
 
-const router = require("./routers/router.js")
+const router = require("./controller/router.js")
 app.use('/route',router)
 app.listen(PORT,async ()=>{
     try {
