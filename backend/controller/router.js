@@ -3,6 +3,7 @@ const router = express.Router();
 const User = require('../model/schema.js')
 const bcrypt = require('bcrypt');
 const nodemailer = require('nodemailer');
+const upload = require('../controller/multer.js').upload;
 router.post('/signup',async (req,res)=>{
     try {
         const {username , email,password}= req.body;
@@ -129,8 +130,36 @@ router.post('/verifyotp', async (req, res) => {
     }
 });
 
-module.exports = router;
+router.post('/api/pdf/summarize', async (req, res) => {
+    try {
+        const { text, fileUrl } = req.body;
+        let content = text;
+        
+        // If fileUrl is provided but no text, we would extract text from the file
+        // In a real implementation, you would use a PDF parsing library here
+        if (fileUrl && !text) {
+            content = "This is a sample summary for the uploaded file. In a production environment, we would extract text from the file and generate a proper summary using NLP techniques.";
+        }
+        
+        // Simple summarization logic - first 200 characters
+        const summary = content.length > 200 ? content.substring(0, 200) + '...' : content;
+        res.status(200).send({ summary });
+    } catch (error) {
+        console.error('Error summarizing text:', error);
+        res.status(500).send({ msg: 'Error generating summary' });
+    }
+});
+
+// File management routes
+const fileController = require('./fileController');
+
+// Save file metadata
+router.post('/api/files/save', upload.single('file'), fileController.saveFile);
+
+// Get user files
+router.get('/api/files/user/:userEmail', fileController.getUserFiles);
+
+// Update file summary
+router.post('/api/files/summary', fileController.updateFileSummary);
 
 module.exports = router;
-
-module.exports=router;
